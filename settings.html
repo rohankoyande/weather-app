@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App Settings</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #f4f4f4;
+            color: #333;
+            text-align: center;
+        }
+        
+        h1 {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #333;
+        }
+        
+        .settings-container {
+            max-width: 600px;
+            margin: 30px auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        .setting-option {
+            margin: 15px;
+        }
+        
+        select {
+            padding: 10px;
+            font-size: 16px;
+            width: 100%;
+            margin-top: 5px;
+        }
+        
+        .back-button {
+            display: inline-block;
+            margin-top: 20px;
+            padding: 10px 20px;
+            background-color: #007BFF;
+            color: white;
+            text-decoration: none;
+            border-radius: 5px;
+        }
+        
+        .back-button:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div class="settings-container">
+        <h1>Settings</h1>
+
+        <div class="setting-option">
+            <label for="citySelect">Default City:</label>
+            <select id="citySelect">
+                <option value="London">London</option>
+                <option value="New York">New York</option>
+                <option value="Paris">Paris</option>
+                <option value="Tokyo">Tokyo</option>
+                <option value="Sydney">Sydney</option>
+            </select>
+        </div>
+
+        <div class="setting-option">
+            <label for="unit">Temperature Unit:</label>
+            <select id="unit">
+                <option value="metric">Celsius (°C)</option>
+                <option value="imperial">Fahrenheit (°F)</option>
+            </select>
+        </div>
+
+        <div class="setting-option">
+            <label for="background">Background Color:</label>
+            <select id="background">
+                <option value="#87CEEB">Light Blue</option>
+                <option value="#90EE90">Light Green</option>
+                <option value="#FFD700">Yellow</option>
+            </select>
+        </div>
+
+        <a href="weather.html" class="back-button">Back to Weather Page</a>
+    </div>
+
+    <script>
+        window.onload = () => {
+            const unit = localStorage.getItem('unit') || 'metric';
+            const city = localStorage.getItem('city') || 'London';
+            const background = localStorage.getItem('background') || '#87CEEB';
+
+            document.getElementById('unit').value = unit;
+            document.getElementById('citySelect').value = city;
+            document.getElementById('background').value = background;
+        };
+
+        // Save settings
+        document.getElementById('citySelect').onchange = () => {
+            localStorage.setItem('city', document.getElementById('citySelect').value);
+        };
+
+        document.getElementById('unit').onchange = () => {
+            localStorage.setItem('unit', document.getElementById('unit').value);
+        };
+
+        document.getElementById('background').onchange = () => {
+            localStorage.setItem('background', document.getElementById('background').value);
+        };
+    </script>
+
+</body>
+
+</html>

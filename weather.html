@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Weather App</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            margin: 0;
+            padding: 0;
+            background: #87CEEB;
+            text-align: center;
+            color: #333;
+        }
+        
+        h1 {
+            margin-top: 20px;
+            font-size: 32px;
+            color: #333;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 30px;
+            background: rgba(255, 255, 255, 0.9);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 10px;
+        }
+        
+        select,
+        input[type="text"] {
+            width: 80%;
+            padding: 10px;
+            margin: 10px 0;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+        
+        button {
+            padding: 12px 25px;
+            font-size: 16px;
+            color: #fff;
+            background-color: #007BFF;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        
+        button:hover {
+            background-color: #0056b3;
+        }
+        
+        .weather-details,
+        .forecast,
+        .settings {
+            margin-top: 30px;
+        }
+        
+        .weather-card,
+        .forecast-card {
+            display: inline-block;
+            width: 30%;
+            margin: 10px;
+            padding: 15px;
+            background-color: #f1f1f1;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            text-align: left;
+            color: #333;
+        }
+        
+        .weather-card h3,
+        .forecast-card h3 {
+            margin-bottom: 10px;
+        }
+        
+        .error {
+            color: red;
+            margin-top: 20px;
+            font-size: 18px;
+        }
+        
+        .settings {
+            margin-top: 30px;
+        }
+        
+        .setting-option {
+            margin: 10px;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1>Weather App</h1>
+
+        <!-- Predefined Cities Select -->
+        <label for="citySelect">Choose a default city:</label>
+        <select id="citySelect" onchange="getWeather()">
+            <option value="">Select a city</option>
+            <option value="London">London</option>
+            <option value="New York">New York</option>
+            <option value="Paris">Paris</option>
+            <option value="Tokyo">Tokyo</option>
+            <option value="Sydney">Sydney</option>
+        </select>
+
+        <!-- Input and Settings -->
+        <input type="text" id="cityInput" placeholder="Or enter another city">
+        <button onclick="getWeather()">Get Weather</button>
+
+        <div class="settings">
+            <div class="setting-option">
+                <label for="unit">Select Temperature Unit:</label>
+                <select id="unit" onchange="getWeather()">
+                    <option value="metric">Celsius (°C)</option>
+                    <option value="imperial">Fahrenheit (°F)</option>
+                </select>
+            </div>
+            <div class="setting-option">
+                <label for="background">Select Background Color:</label>
+                <select id="background" onchange="changeBackgroundColor()">
+                    <option value="#87CEEB">Light Blue</option>
+                    <option value="#90EE90">Light Green</option>
+                    <option value="#FFD700">Yellow</option>
+                </select>
+            </div>
+        </div>
+
+        <div id="output" class="weather-details"></div>
+        <div id="forecast" class="forecast"></div>
+        <div id="error" class="error"></div>
+
+        <!-- Link to Settings Page -->
+        <br>
+        <a href="settings.html">Go to Settings Page</a>
+    </div>
+
+    <script>
+        const apiKey = "2653ead9f736453dbf10c83fe6c1ffbe"; // Replace with your OpenWeatherMap API key
+
+        // Load settings from localStorage
+        window.onload = () => {
+            const unit = localStorage.getItem('unit') || 'metric';
+            const city = localStorage.getItem('city') || 'London';
+            const background = localStorage.getItem('background') || '#87CEEB';
+
+            document.getElementById('unit').value = unit;
+            document.getElementById('background').value = background;
+            document.body.style.backgroundColor = background;
+
+            document.getElementById('citySelect').value = city;
+            getWeather();
+        };
+
+        // Change background color
+        function changeBackgroundColor() {
+            const background = document.getElementById('background').value;
+            document.body.style.backgroundColor = background;
+            localStorage.setItem('background', background);
+        }
+
+        // Get weather based on input city or predefined city
+        async function getWeather() {
+            const city = document.getElementById("citySelect").value || document.getElementById("cityInput").value.trim();
+            const output = document.getElementById("output");
+            const forecast = document.getElementById("forecast");
+            const error = document.getElementById("error");
+            const unit = document.getElementById('unit').value;
+
+            // Save the city and unit to localStorage
+            localStorage.setItem('city', city);
+            localStorage.setItem('unit', unit);
+
+            // Clear previous results and errors
+            output.innerHTML = "";
+            forecast.innerHTML = "";
+            error.innerHTML = "";
+
+            if (city === "") {
+                error.innerHTML = "Please enter a city name.";
+                return;
+            }
+
+            // API URL for current weather and forecast
+            const apiUrlCurrent = `https://api.openweathermap.org/data/2.5/weather?q=${city}&appid=${apiKey}&units=${unit}`;
+            const apiUrlForecast = `https://api.openweathermap.org/data/2.5/forecast?q=${city}&appid=${apiKey}&units=${unit}`;
+
+            try {
+                const responseCurrent = await fetch(apiUrlCurrent);
+                if (!responseCurrent.ok) {
+                    throw new Error("City not found or invalid API key");
+                }
+                const weatherDataCurrent = await responseCurrent.json();
+
+                const responseForecast = await fetch(apiUrlForecast);
+                if (!responseForecast.ok) {
+                    throw new Error("Error fetching forecast data");
+                }
+                const weatherDataForecast = await responseForecast.json();
+
+                // Display current weather
+                output.innerHTML = `
+                    <div class="weather-card">
+                        <h3>Current Weather in ${weatherDataCurrent.name}</h3>
+                        <p><strong>Temperature:</strong> ${weatherDataCurrent.main.temp}°</p>
+                        <p><strong>Weather:</strong> ${weatherDataCurrent.weather[0].description}</p>
+                        <p><strong>Humidity:</strong> ${weatherDataCurrent.main.humidity}%</p>
+                        <p><strong>Wind Speed:</strong> ${weatherDataCurrent.wind.speed} m/s</p>
+                    </div>
+                `;
+
+                // Display forecast for the next 5 days
+                let forecastHTML = '';
+                for (let i = 0; i < 5; i++) {
+                    const day = weatherDataForecast.list[i * 8];
+                    forecastHTML += `
+                        <div class="forecast-card">
+                            <h3>Day ${i + 1}</h3>
+                            <img src="http://openweathermap.org/img/wn/${day.weather[0].icon}.png" alt="weather icon">
+                            <p><strong>Temperature:</strong> ${day.main.temp}°</p>
+                            <p><strong>Weather:</strong> ${day.weather[0].description}</p>
+                        </div>
+                    `;
+                }
+
+                forecast.innerHTML = forecastHTML;
+
+            } catch (err) {
+                error.innerHTML = err.message;
+            }
+        }
+    </script>
+</body>
+
+</html>
